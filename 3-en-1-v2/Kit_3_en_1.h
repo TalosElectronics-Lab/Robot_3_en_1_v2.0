@@ -37,7 +37,7 @@ public:
     void init();
     void modo_3_en_1();
     char Leer_BT();
-    void modo_bluetooth();
+    char modo_bluetooth();
 
     void modo_evasor(int Distancia, uint8_t velocidad);
     float obtener_distancia();

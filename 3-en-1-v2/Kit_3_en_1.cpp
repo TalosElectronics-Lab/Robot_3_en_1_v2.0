@@ -1,4 +1,63 @@
 #include "Kit_3_en_1.h"
+char traslateD1(int d1Value)
+{
+    char Estado;
+    if (d1Value == 1)
+    {
+        Estado = '1';
+    }
+    if (d1Value == 2)
+    {
+        Estado = '2';
+    }
+    if (d1Value == 3)
+    {
+        Estado = '3';
+    }
+    if (d1Value == 4)
+    {
+        Estado = '4';
+    }
+    if (d1Value == 5)
+    {
+        Estado = '5';
+    }
+    if (d1Value == 6)
+    {
+        Estado = '6';
+    }
+    if (d1Value == 7)
+    {
+        Estado = '7';
+    }
+    if (d1Value == 8)
+    {
+        Estado = '8';
+    }
+    if (d1Value == 9)
+    {
+        Estado = '9';
+    }
+
+    return Estado;
+}
+int parseD1Value(String json)
+{
+    if (json == 's')
+    {
+        return 'w';
+    }
+    int d1Value = 0;
+    int pos = json.indexOf("\"D1\":"); // Encontrar la posición donde comienza la clave "D1"
+    if (pos != -1)
+    {                                       // Si se encuentra la clave "D1"
+        pos += 6;                           // Avanzar 6 posiciones para omitir la clave "D1": "
+        String d1Str = json.substring(pos); // Obtener la subcadena que contiene el valor de D1
+        d1Value = d1Str.toInt();            // Convertir la subcadena a un entero
+    }
+    return d1Value;
+}
+
 void Kit_3_en_1::init()
 {
     Motores_init();
@@ -16,106 +75,90 @@ void Kit_3_en_1::init()
     pinMode(S4, INPUT_PULLUP);
     pinMode(S5, INPUT_PULLUP);
 }
-void Kit_3_en_1::modo_3_en_1()
+char Kit_3_en_1::modo_bluetooth()
 {
+    int Estado;
+    int Velocidad_Max = 255;
+    int Velocidad_Med = 180;
+    Estado = Leer_BT();
 
-    if (Bluetooth.available() > 0)
+    if (Estado == '6')
     {
-        Estado = Bluetooth.read();
-        // Serial.println(Estado);
+        // Arriba_Izquierda
+        Motores_mv(Velocidad_Med, Velocidad_Max);
     }
-    if (Estado == 'a')
+    else if (Estado == '3')
     {
-        Menu = 30;
+        // Derecho
+        Motores_mv(Velocidad_Max, Velocidad_Max);
     }
-    else if (Estado == 'b')
+    else if (Estado == '8')
     {
-        Menu = 10;
+        // Arriba_Derecha
+        Motores_mv(Velocidad_Max, Velocidad_Med);
     }
-    else if (Estado == 'c')
+    else if (Estado == '1')
     {
-        Menu = 20;
+        // Girar a la izquierda
+        Motores_mv(Velocidad_Max, -Velocidad_Max);
     }
-
-    switch (Menu)
+    else if (Estado == '2')
     {
-    case 10:
-        if (Bluetooth.available() > 0)
-        {
-            Estado = Bluetooth.read();
-            // Serial.println(Estado);
-        }
-        if (Estado == '1')
-        {
-            // Arriba_Izquierda
-            Motores_mv(Velocidad_Med, Velocidad_Max);
-        }
-        else if (Estado == '2')
-        {
-            // Derecho
-            Motores_mv(Velocidad_Max, Velocidad_Max);
-        }
-        else if (Estado == '3')
-        {
-            // Arriba_Derecha
-            Motores_mv(Velocidad_Max, Velocidad_Med);
-        }
-        else if (Estado == '4')
-        {
-            // Girar a la izquierda
-            Motores_mv(-Velocidad_Max, Velocidad_Max);
-        }
-        else if (Estado == '5')
-        {
-            // Serial.println("Logo talos");
-        }
-        else if (Estado == '6')
-        {
-            // Girar a la derecha
-            Motores_mv(Velocidad_Max, -Velocidad_Max);
-        }
-        else if (Estado == '7')
-        {
-            // Abajo Izquierda
-            Motores_mv(-Velocidad_Med, -Velocidad_Max);
-        }
-        else if (Estado == '8')
-        {
-            // Reversa
-            Motores_mv(-Velocidad_Max, -Velocidad_Max);
-        }
-        else if (Estado == '9')
-        {
-            // Abajo Derecha
-            Motores_mv(-Velocidad_Max, -Velocidad_Med);
-        }
-        else if (Estado == 'w')
-        {
-            Motores_mv(0, 0);
-        }
-        break;
-
-    case 20:
-        modo_evasor(25, 100); // 25cm=Distancia del obstaculo
-        break;
-
-    case 30:
-        modo_seguidor(8, .2, 5, 50);
-        break;
+        // Girar a la derecha
+        Motores_mv(-Velocidad_Max, Velocidad_Max);
     }
+    else if (Estado == '7')
+    {
+        // Abajo Izquierda
+        Motores_mv(Velocidad_Med, Velocidad_Max);
+    }
+    else if (Estado == '4')
+    {
+        // Reversa
+        Motores_mv(Velocidad_Max, Velocidad_Max);
+    }
+    else if (Estado == '9')
+    {
+        // Abajo Derecha
+        Motores_mv(Velocidad_Max, Velocidad_Med);
+    }
+    else if (Estado == 'w')
+    {
+        Motores_mv(0, 0);
+    }
+    return Estado;
 }
+
 Kit_3_en_1::~Kit_3_en_1()
 {
 }
 
 char Kit_3_en_1::Leer_BT()
 {
-    if (Bluetooth.available() > 0)
+    if (Bluetooth.available())
     {
-        Estado = Bluetooth.read();
-        // Serial.println(Estado);
+        char _command = Bluetooth.read();
+
+        if (_command == '1')
+        {
+            return 'a';
+        }
+        if (_command == 's')
+        {
+            return 'w';
+        }
+        if (_command == '2')
+        {
+            return 'c';
+        }
+        if (_command == '{')
+        {
+            // Si hay datos disponibles para leer desde el módulo Bluetooth
+            String data = Bluetooth.readStringUntil('}'); // Leer los datos hasta que se reciba un salto de línea (\n)
+            int d1Value = parseD1Value(data);
+            return traslateD1(d1Value);
+        }
     }
-    return Estado;
 }
 void Kit_3_en_1::modo_evasor(int Distancia, uint8_t velocidad)
 {

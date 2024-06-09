@@ -17,7 +17,7 @@ ver vomo se comporta y si es necesario ajustar el los valores en compensar el ot
 
 #include "Kit_3_en_1.h"
 Kit_3_en_1 robot;
-char Menu;
+char menu;
 void setup()
 {
     robot.init();
@@ -27,5 +27,17 @@ void setup()
 }
 void loop()
 {
-    robot.modo_3_en_1();
+    menu = robot.modo_bluetooth();
+    switch (menu)
+    {
+
+    case 'a':
+        robot.modo_seguidor(8, .2, 5, 50);
+
+        break;
+
+    case 'c':
+        robot.modo_evasor(25,100); // 25cm=Distancia del obstaculo
+        break;
+    }
 }
